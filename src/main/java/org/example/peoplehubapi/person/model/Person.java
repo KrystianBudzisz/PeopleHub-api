@@ -1,39 +1,33 @@
 package org.example.peoplehubapi.person.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
-
-@Table(name = "persons")
+@SuperBuilder
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED) // Strategia dziedziczenia
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "person_type", discriminatorType = DiscriminatorType.STRING)
 public abstract class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false)
     private String firstName;
-
-    @Column(nullable = false)
     private String lastName;
-
-    @Column(nullable = false, unique = true)
-    private String pesel; // Unikalny identyfikator
-
-    @Column(nullable = true)
-    private Double height;
-
-    @Column(nullable = true)
-    private Double weight;
-
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
+    private String pesel;
+    private double height;
+    private double weight;
     private String email;
 
-
+    @Version
+    private int version;
 
 }

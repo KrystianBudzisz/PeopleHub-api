@@ -1,45 +1,54 @@
 package org.example.peoplehubapi.person;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.example.peoplehubapi.person.model.CreatePersonCommand;
-import org.example.peoplehubapi.person.model.Person;
+import org.example.peoplehubapi.person.model.PersonDTO;
 import org.example.peoplehubapi.person.model.UpdatePersonCommand;
-import org.example.peoplehubapi.person.model.PersonDto;
+import org.example.peoplehubapi.person.specification.PersonSearchCriteria;
+import org.example.peoplehubapi.position.model.CreatePositionCommand;
+import org.example.peoplehubapi.position.model.PositionDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/persons")
+@RequestMapping("/api/persons")
 public class PersonController {
 
     private final PersonService personService;
 
-//    @PostMapping("/add")
-//    public ResponseEntity<PersonDto> addPerson(@RequestBody CreatePersonCommand createPersonCommand) {
-//        PersonDto personDto = personService.addPerson(createPersonCommand);
-//        return new ResponseEntity<>(personDto, HttpStatus.CREATED);
-//    }
-//    @PostMapping
-//    public ResponseEntity<PersonDto> addPerson(@RequestBody CreatePersonCommand command) {
-//        Person person = PersonFactory.createPerson(command);
-//        Person savedPerson = personService.addPerson(person);
-//        return new ResponseEntity<>(new PersonDto(savedPerson), HttpStatus.CREATED);
-//    }
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
+    public PersonDTO createPerson(@RequestBody @Valid CreatePersonCommand command) {
+        return personService.create(command);
+    }
 
     @GetMapping("/search")
-    public ResponseEntity<Page<PersonDto>> searchPersons(SearchCriteria criteria, Pageable pageable) {
-        Page<PersonDto> persons = personService.searchPersons(criteria, pageable);
-        return new ResponseEntity<>(persons, HttpStatus.OK);
+    @ResponseStatus(HttpStatus.OK)
+    public Page<PersonDTO> searchPersons(PersonSearchCriteria criteria,
+                                         @PageableDefault(page = 0, size = 10) Pageable pageable) {
+        return personService.searchPersons(criteria, pageable);
     }
 
-    @PutMapping("/edit/{id}")
-    public ResponseEntity<PersonDto> editPerson(@PathVariable Long id, @RequestBody UpdatePersonCommand editPersonCommand) {
-        PersonDto personDto = personService.editPerson(id, editPersonCommand);
-        return ResponseEntity.ok(personDto);
+    @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN')")
+    public PersonDTO updatePerson(@PathVariable Long id, @RequestBody UpdatePersonCommand command) {
+        return personService.update(id, command);
     }
+
+    @PostMapping("/{employeeId}/positions")
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+    public PositionDTO addPositionToEmployee(@PathVariable Long employeeId, @RequestBody @Valid CreatePositionCommand command) {
+        return personService.addPosition(employeeId, command);
+    }
+
 }
 

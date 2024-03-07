@@ -1,22 +1,20 @@
 package org.example.peoplehubapi.person.model;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Builder
+import java.util.Map;
+
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
 public class CreatePersonCommand {
-    private String type; // np. "student", "employee", "retiree"
+    @NotNull(message = "Type cannot be null")
+    private String type;
 
-    private String firstName;
-    private String lastName;
-    private String pesel;
-    private double height;
-    private double weight;
-    private String email;
-
+    @NotNull(message = "Parameters cannot be null")
+    private Map<@NotEmpty(message = "Parameter name cannot be empty") String, @NotEmpty(message = "Parameter value cannot be empty") String> params;
 }

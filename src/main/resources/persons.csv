@@ -1,0 +1,4 @@
+TYP,imie,nazwisko,pesel,wzrost,waga,adres email,pozostale parametry dla konkretnej osoby
+Student,John,Doe,12345678901,180.0,75.0,johndoe@example.com,Example University,3,Computer Science,1500.00
+Retiree,Jane,Smith,98765432109,160.0,65.0,janesmith@example.com,2000.00,40
+Employee,Michael,Johnson,45678901234,175.0,80.0,michaeljohnson@example.com,2022-01-15,Software Engineer,5000.00,1
