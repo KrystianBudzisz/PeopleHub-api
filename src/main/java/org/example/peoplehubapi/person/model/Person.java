@@ -14,7 +14,6 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "person_type", discriminatorType = DiscriminatorType.STRING)
 public abstract class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

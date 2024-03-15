@@ -55,7 +55,7 @@ public class PersonControllerTest {
     }
 
     @Test
-    @WithMockUser(roles={"ADMIN"})
+    @WithMockUser(roles = {"ADMIN"})
     public void createPerson_ShouldPersistAndReturnAllData() throws Exception {
         Map<String, String> params = new HashMap<>();
         params.put("firstName", "John");
@@ -95,12 +95,12 @@ public class PersonControllerTest {
     }
 
     @Test
-    @WithMockUser(roles={"ADMIN"})
+    @WithMockUser(roles = {"ADMIN"})
     public void testCreateAndUpdatePersonWithAllAttributes() throws Exception {
         Map<String, String> studentAttributes = new HashMap<>();
         studentAttributes.put("firstName", "John");
         studentAttributes.put("lastName", "Doe");
-        studentAttributes.put("pesel", "1234567890");
+        studentAttributes.put("pesel", "12345678901");
         studentAttributes.put("height", "180");
         studentAttributes.put("weight", "80");
         studentAttributes.put("email", "john.doe@example.com");
@@ -149,7 +149,7 @@ public class PersonControllerTest {
     }
 
     @Test
-    @WithMockUser(roles={"ADMIN", "EMPLOYEE"})
+    @WithMockUser(roles = {"ADMIN", "EMPLOYEE"})
     public void testAddPositionToEmployee() throws Exception {
         Employee testEmployee = Employee.builder()
                 .firstName("John")
@@ -188,7 +188,7 @@ public class PersonControllerTest {
     }
 
     @Test
-    @WithMockUser(roles={"USER"})
+    @WithMockUser(roles = {"USER"})
     public void searchPersons_WhenCriteriaMatch_ShouldReturnSpecificPerson() throws Exception {
         Employee testEmployee = Employee.builder()
                 .firstName("John")

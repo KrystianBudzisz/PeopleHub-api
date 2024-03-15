@@ -1,5 +1,6 @@
 package org.example.peoplehubapi.person;
 
+import org.example.peoplehubapi.exception.InvalidPersonCreationException;
 import org.example.peoplehubapi.person.model.CreatePersonCommand;
 import org.example.peoplehubapi.person.model.PersonDTO;
 import org.example.peoplehubapi.person.model.UpdatePersonCommand;
@@ -28,8 +29,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -329,6 +329,28 @@ class PersonServiceTest {
         assertEquals(employee.getNumberOfProfessions(), foundEmployee.getAdditionalAttributes().get("numberOfProfessions"));
     }
 
+    @Test
+    void createEmployee_MissingFirstName_ThrowsInvalidPersonCreationException() {
+        // Arrange
+        Map<String, String> params = new HashMap<>();
+        params.put("lastName", "Doe");
+        params.put("pesel", "89010112345");
+        params.put("email", "jane.doe@example.com");
+        params.put("height", "170");
+        params.put("weight", "60");
+        params.put("employmentDate", "2020-01-01");
+        params.put("position", "Software Developer");
+        params.put("salary", "3000");
+        params.put("numberOfProfessions", "1");
 
+        CreatePersonCommand command = new CreatePersonCommand("EMPLOYEE", params);
+
+        doThrow(new InvalidPersonCreationException("First name is required."))
+                .when(employeeStrategy).create(any(CreatePersonCommand.class));
+
+        Exception exception = assertThrows(InvalidPersonCreationException.class, () -> personService.create(command));
+
+        assertTrue(exception.getMessage().contains("First name is required."));
+    }
 }
 

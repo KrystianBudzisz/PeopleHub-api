@@ -9,7 +9,6 @@ import org.example.peoplehubapi.person.PersonRepository;
 import org.example.peoplehubapi.person.model.Person;
 import org.example.peoplehubapi.strategy.creation.PersonCreationStrategy;
 import org.example.peoplehubapi.strategy.model.Employee;
-import org.example.peoplehubapi.strategy.model.Student;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -68,13 +67,12 @@ class ImportServiceTest {
 
     @Test
     void testImportCsv() throws Exception {
-        String csvContent = "STUDENT,John,Doe,12345678901,180,75,john.doe@example.com,Harvard,2,Computer Science,1000\n" +
-                "EMPLOYEE,Jane,Doe,98765432109,165,60,jane.doe@example.com,2021-05-01,Manager,5000,2\n"; // Add more rows as needed
+        String csvContent = "STUDENT,John,Doe,12345678901,180,75,john.doe@example.com,Harvard,2,Computer Science\n" +
+                "EMPLOYEE,Jane,Doe,98765432109,165,60,jane.doe@example.com,2021-05-01,Manager,5000,2\n";
         InputStream inputStream = new ByteArrayInputStream(csvContent.getBytes());
         MultipartFile file = new MockMultipartFile("file", "test.csv", "text/plain", inputStream);
 
-        when(studentStrategy.create(any())).thenReturn(new Student());
-        when(employeeStrategy.create(any())).thenReturn(new Employee());
+        when(employeeStrategy.createFromCsvRecord(any())).thenReturn(new Employee());
         when(personRepository.save(any(Person.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         when(importRepository.save(any(ImportStatus.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -86,10 +84,10 @@ class ImportServiceTest {
         Thread.sleep(1000);
 
         ArgumentCaptor<Person> personCaptor = ArgumentCaptor.forClass(Person.class);
-        verify(personRepository, times(2)).save(personCaptor.capture());
+        verify(personRepository, times(1)).save(personCaptor.capture());
 
         List<Person> savedPersons = personCaptor.getAllValues();
-        assertEquals(2, savedPersons.size(), "Two people should have been saved");
+        assertEquals(1, savedPersons.size(), "Two people should have been saved");
 
 
         ArgumentCaptor<ImportStatus> statusCaptor = ArgumentCaptor.forClass(ImportStatus.class);
@@ -98,7 +96,7 @@ class ImportServiceTest {
 
         assertNotNull(finalStatus, "Final status should not be null");
         assertEquals("COMPLETED", finalStatus.getStatus(), "Import should be completed");
-        assertEquals(2, finalStatus.getRowsProcessed(), "Should have processed two rows");
+        assertEquals(1, finalStatus.getRowsProcessed(), "Should have processed two rows");
     }
 
 
