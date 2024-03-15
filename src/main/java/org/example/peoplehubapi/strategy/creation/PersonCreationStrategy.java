@@ -11,4 +11,7 @@ public interface PersonCreationStrategy {
 
     Person update(Person person, UpdatePersonCommand command);
 
+    Person createFromCsvRecord(String[] record);
+
+
 }

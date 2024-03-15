@@ -55,6 +55,7 @@ public class PersonService {
         return personPage.map(PersonMapper::toDTO);
     }
 
+
     @Transactional
     public PersonDTO update(Long id, UpdatePersonCommand command) {
         Person person = personRepository.findById(id)
@@ -96,5 +97,6 @@ public class PersonService {
 
         return PositionMapper.toDTO(newPosition);
     }
+
 
 }
