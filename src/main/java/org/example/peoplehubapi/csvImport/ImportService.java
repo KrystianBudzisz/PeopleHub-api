@@ -11,6 +11,7 @@ import org.example.peoplehubapi.exception.ImportStatusNotFoundException;
 import org.example.peoplehubapi.person.PersonRepository;
 import org.example.peoplehubapi.person.model.Person;
 import org.example.peoplehubapi.strategy.creation.PersonCreationStrategy;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -45,6 +47,9 @@ public class ImportService {
         status.setCreationTimestamp(LocalDateTime.now());
         importRepository.save(status);
 
+        final int batchSize = 100000;
+        List<Person> batch = new ArrayList<>(batchSize);
+
         try (Reader reader = new BufferedReader(new InputStreamReader(command.getFile().getInputStream()))) {
             CSVReader csvReader = new CSVReader(reader);
             csvReader.readNext();
@@ -57,17 +62,23 @@ public class ImportService {
                 String personType = nextRecord[0].toUpperCase();
                 PersonCreationStrategy strategy = strategyMap.get(personType);
                 if (strategy != null) {
-                    try {
-                        Person person = strategy.createFromCsvRecord(nextRecord);
-                        personRepository.save(person);
-                        rowsProcessed++;
-                    } catch (Exception e) {
-                        throw new ImportCsvException("Error processing CSV record.", e);
+                    Person person = strategy.createFromCsvRecord(nextRecord);
+                    batch.add(person);
+                    rowsProcessed++;
+
+                    if (rowsProcessed % batchSize == 0) {
+                        personRepository.saveAll(batch);
+                        batch.clear();
                     }
                 } else {
                     throw new ImportCsvException("Unknown person type: " + personType);
                 }
             }
+
+            if (!batch.isEmpty()) {
+                personRepository.saveAll(batch);
+            }
+
             status.setRowsProcessed(rowsProcessed);
             status.setStatus("COMPLETED");
         } catch (IOException | CsvValidationException e) {
@@ -80,6 +91,8 @@ public class ImportService {
 
         return ImportStatusMapper.toDTO(status);
     }
+
+
 
 
     public ImportStatusDTO getImportStatus(String importId) {
