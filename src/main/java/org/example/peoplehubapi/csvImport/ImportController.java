@@ -8,18 +8,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.concurrent.CompletableFuture;
+
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/imports")
 public class ImportController {
 
-    private final ImportService csvImportService;
+    private final ImportService importService;
 
     @PostMapping("/persons")
     @ResponseStatus(HttpStatus.ACCEPTED)
     @PreAuthorize("hasAnyRole('ADMIN', 'IMPORTER')")
-    public ImportStatusDTO importPersons(@Valid ImportCommand command) {
-        return csvImportService.importCsv(command);
+    public CompletableFuture<ImportStatusDTO> importPersons(@Valid ImportCommand command) {
+        return importService.importCsv(command);
     }
 
 
@@ -27,9 +29,8 @@ public class ImportController {
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ADMIN', 'IMPORTER')")
     public ImportStatusDTO getImportStatus(@PathVariable String importId) {
-        return csvImportService.getImportStatus(importId);
+        return importService.getImportStatus(importId);
     }
-
 
 }
 
