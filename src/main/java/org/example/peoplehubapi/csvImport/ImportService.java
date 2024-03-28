@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -61,12 +60,6 @@ public class ImportService {
         status.setStartTimestamp(LocalDateTime.now());
         status.setRowsProcessed(0);
         return importRepository.save(status);
-    }
-
-    private List<String> readAllLines(ImportCommand command) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(command.getFile().getInputStream()))) {
-            return reader.lines().skip(1).collect(Collectors.toList());
-        }
     }
 
     @Async
