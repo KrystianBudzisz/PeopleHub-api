@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -22,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class ImportService {
@@ -41,15 +41,17 @@ public class ImportService {
 
     public void importCsv(ImportCommand command) throws ImportCsvException {
         ImportStatus status = initializeImportStatus();
-        try {
-            List<String> allLines = readAllLines(command);
-            processLinesAsync(allLines, status);
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(command.getFile().getInputStream()))) {
+            Stream<String> lines = reader.lines().skip(1);
+            processLinesStream(lines, status);
+            lines.close();
         } catch (Exception e) {
             status.setStatus("FAILED");
             finalizeImportStatus(status, "FAILED");
             throw new ImportCsvException("Error initializing CSV import", e);
         }
     }
+
 
     private ImportStatus initializeImportStatus() {
         ImportStatus status = new ImportStatus();
@@ -60,24 +62,20 @@ public class ImportService {
         return importRepository.save(status);
     }
 
-    private List<String> readAllLines(ImportCommand command) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(command.getFile().getInputStream()))) {
-            return reader.lines().skip(1).collect(Collectors.toList());
-        }
-    }
-
     @Async
-    public void processLinesAsync(List<String> lines, ImportStatus status) {
+    public void processLinesStream(Stream<String> linesStream, ImportStatus status) {
+        final int[] counter = {0};
         final int batchSize = 10000;
         List<String> batchLines = new ArrayList<>(batchSize);
 
-        for (String line : lines) {
+        linesStream.forEach(line -> {
             batchLines.add(line);
             if (batchLines.size() == batchSize) {
                 processBatch(batchLines, status);
                 batchLines.clear();
             }
-        }
+            counter[0]++;
+        });
 
         if (!batchLines.isEmpty()) {
             processBatch(batchLines, status);
@@ -85,6 +83,7 @@ public class ImportService {
 
         finalizeImportStatus(status, "COMPLETED");
     }
+
 
     @Transactional
     protected void processBatch(List<String> lines, ImportStatus status) {
