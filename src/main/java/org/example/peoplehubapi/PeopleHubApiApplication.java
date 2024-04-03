@@ -7,7 +7,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @SpringBootApplication
 @EnableAsync
 public class PeopleHubApiApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(PeopleHubApiApplication.class, args);
     }
