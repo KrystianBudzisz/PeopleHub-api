@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import org.example.peoplehubapi.csvImport.model.ImportCommand;
 import org.example.peoplehubapi.csvImport.model.ImportStatus;
 import org.example.peoplehubapi.csvImport.model.ImportStatusDTO;
 import org.example.peoplehubapi.csvImport.model.ImportStatusMapper;
@@ -70,7 +71,8 @@ public class ImportService {
     }
 
 
-    public ImportStatusDTO importCsv(MultipartFile file) throws ImportCsvException {
+    public ImportStatusDTO importCsv(ImportCommand command) throws ImportCsvException {
+        MultipartFile file = command.getFile();
         String fileKey = uploadFileToS3(file);
         ImportStatus importStatus = importCsvTransactional(fileKey);
         return ImportStatusMapper.toDTO(importStatus);

@@ -22,4 +22,16 @@ spring:
       max-file-size: 250MB
       max-request-size: 250MB
 
+cloud:
+  aws:
+    credentials:
+      access-key: AKIAXYKJWPCTHHOSOJNB
+      secret-key: 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
+    region:
+      static: eu-central-1
+    stack:
+      auto: false
 
+application:
+  bucket:
+    name: budzisz3

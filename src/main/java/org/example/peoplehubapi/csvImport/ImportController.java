@@ -1,6 +1,8 @@
 package org.example.peoplehubapi.csvImport;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.example.peoplehubapi.csvImport.model.ImportCommand;
 import org.example.peoplehubapi.csvImport.model.ImportStatusDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,8 +19,8 @@ public class ImportController {
     @PostMapping("/persons")
     @ResponseStatus(HttpStatus.ACCEPTED)
     @PreAuthorize("hasAnyRole('ADMIN', 'IMPORTER')")
-    public ImportStatusDTO importPersons(@RequestParam("file") MultipartFile file) {
-        return importService.importCsv(file);
+    public ImportStatusDTO importPersons(@Valid @ModelAttribute ImportCommand command) {
+        return importService.importCsv(command);
     }
 
     @GetMapping("/status/{importId}")
